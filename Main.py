@@ -90,7 +90,7 @@ if __name__ == "__main__":
     except Exception as e:
         msg = QMessageBox() 
         msg.setIcon(QMessageBox.Critical) 
-        msg.setText("Warning")
-        msg.setWindowTitle("Unhandled Error: " + str(e)) 
+        msg.setWindowTitle("Warning")
+        msg.setText("Unhandled Error: " + str(e)) 
         msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)  
         retval = msg.exec_() 
