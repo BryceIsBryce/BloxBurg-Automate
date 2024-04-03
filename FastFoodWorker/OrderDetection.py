@@ -4,17 +4,19 @@ import pyautogui
 import os
 import time
 
-from OrderProcess import BurgerOrder, FriesOrder, DrinkOrder, CompleteOrder
+from .OrderProcess import BurgerOrder, FriesOrder, DrinkOrder, CompleteOrder
 
 class ImageRecognitionAI:
     def __init__(self):
-        self.BurgerTemplatesFolder = "ToppingsTemplates"
-        self.FriesTemplatesFolder = "FriesTemplates"
-        self.DrinkTemplatesFolder = "DrinkTemplates"
+        self.BurgerTemplatesFolder = "FastFoodWorker/ToppingsTemplates"
+        self.FriesTemplatesFolder = "FastFoodWorker/FriesTemplates"
+        self.DrinkTemplatesFolder = "FastFoodWorker/DrinkTemplates"
+        self.QuantityTemplates = "FastFoodWorker/QuantityTemplates"
+        self.SizeTemplates = "FastFoodWorker/SizeTemplates"
         self.OrderArea = (650, 300, 1290, 440)
 
     def TakeScreenshot(self, area):
-        Screenshot = pyautogui.Screenshot(region=area)
+        Screenshot = pyautogui.screenshot(region=area)
         ScreenshotNP = np.array(Screenshot)
         ScreenshotNP = cv2.cvtColor(ScreenshotNP, cv2.COLOR_BGR2RGB)
         return ScreenshotNP
@@ -73,8 +75,8 @@ class ImageRecognitionAI:
             CropImg = Screenshot[v['coordinates'][0][1]:v['coordinates'][1][1], v['coordinates'][0][0]:v['coordinates'][1][0]]
             CropImg = cv2.cvtColor(CropImg, cv2.COLOR_BGR2GRAY)
 
-            Template_1_path = os.path.join("QuantityTemplates", "1.png")
-            Template_2_path = os.path.join("QuantityTemplates", "2.png")
+            Template_1_path = os.path.join(self.QuantityTemplates, "1.png")
+            Template_2_path = os.path.join(self.QuantityTemplates, "2.png")
             Template_1 = cv2.imread(Template_1_path, cv2.IMREAD_COLOR)
             Template_1Gray = cv2.cvtColor(Template_1, cv2.COLOR_BGR2GRAY)
             Template_2 = cv2.imread(Template_2_path, cv2.IMREAD_COLOR)
@@ -118,7 +120,7 @@ class ImageRecognitionAI:
                 CropImg = cv2.cvtColor(CropImg, cv2.COLOR_BGR2GRAY)
                 SizeMatches = {}
                 for SizeName in ['small', 'medium', 'large']:
-                    SizeTemplatePath = os.path.join("SizeTemplates", f"{SizeName}.png")
+                    SizeTemplatePath = os.path.join(self.SizeTemplates, f"{SizeName}.png")
                     SizeTemplate = cv2.imread(SizeTemplatePath, cv2.IMREAD_COLOR)
                     SizeTemplateGray = cv2.cvtColor(SizeTemplate, cv2.COLOR_BGR2GRAY)
                     ResSize = cv2.matchTemplate(CropImg, SizeTemplateGray, cv2.TM_CCOEFF_NORMED)

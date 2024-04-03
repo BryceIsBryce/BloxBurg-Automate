@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 import sys
+import time
 
 from FastFoodWorker.OrderDetection import ImageRecognitionAI
 
@@ -52,6 +53,34 @@ class Ui(Window):
     def __init__(self):
         super(Ui, self).__init__("main")
         self.show()
+        
+        self.JobOption: QComboBox = self.findChild(QComboBox, "comboBox")
+        self.ModelName: QComboBox = self.findChild(QComboBox, "comboBox_2")
+        
+        self.RunButton: QPushButton = self.findChild(QPushButton, "pushButton")
+        self.StopButton: QPushButton = self.findChild(QPushButton, "pushButton_2")
+        
+        self.StopButton.setEnabled(False)
+        
+        self.RunButton.clicked.connect(self.RunModel)
+        
+    def RunModel(self):
+        self.RunButton.setEnabled(False)
+        self.RunButton.setText("Wait")
+        if self.JobOption.currentText() == "Fast Food Worker":
+            if self.ModelName.currentText() == "Stable":
+                Model = ImageRecognitionAI()
+                self.RunButton.setText("Running")
+                # self.StopButton.setEnabled(True)
+                time.sleep(1)
+                for _ in range(self.spinBox.value()):
+                    if self.checkBox.isChecked():
+                        Model.CaptureAndProcessOrderV2()
+                    else:
+                        Model.CaptureAndProcessOrderV1()
+                    time.sleep(4)
+        self.RunButton.setEnabled(True)
+        self.RunButton.setText("Run")
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)

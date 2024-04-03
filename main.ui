@@ -198,6 +198,16 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="QLabel" name="label_6">
+      <property name="styleSheet">
+       <string notr="true">font-size:9px;color:#bbbbbb;</string>
+      </property>
+      <property name="text">
+       <string>*Note: For whatever reason, this AI does not work well if Roblox is fullscreened.</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
  </widget>
