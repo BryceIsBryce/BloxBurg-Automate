@@ -83,6 +83,14 @@ class Ui(Window):
         self.RunButton.setText("Run")
         
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = Ui()
-    app.exec_()
+    try:
+        app = QApplication(sys.argv)
+        window = Ui()
+        app.exec_()
+    except Exception as e:
+        msg = QMessageBox() 
+        msg.setIcon(QMessageBox.Critical) 
+        msg.setText("Warning")
+        msg.setWindowTitle("Unhandled Error: " + str(e)) 
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)  
+        retval = msg.exec_() 
