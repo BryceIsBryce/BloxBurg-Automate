@@ -14,19 +14,19 @@ class ImageRecognitionAI:
         self.OrderArea = (650, 300, 1290, 440)
 
     def TakeScreenshot(self, area):
-        screenshot = pyautogui.screenshot(region=area)
-        screenshot_np = np.array(screenshot)
-        screenshot_np = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2RGB)
-        return screenshot_np
+        Screenshot = pyautogui.Screenshot(region=area)
+        ScreenshotNP = np.array(Screenshot)
+        ScreenshotNP = cv2.cvtColor(ScreenshotNP, cv2.COLOR_BGR2RGB)
+        return ScreenshotNP
 
-    def PreprocessImage(self, image):
-        image = cv2.GaussianBlur(image, (5, 5), 0)
-        return image
+    def PreprocessImage(self, Image):
+        Image = cv2.GaussianBlur(Image, (5, 5), 0)
+        return Image
 
-    def MatchBurgers(self, screenshot):
+    def MatchBurgers(self, Screenshot):
         AllMatches = []
 
-        ScreenshotGray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+        ScreenshotGray = cv2.cvtColor(Screenshot, cv2.COLOR_BGR2GRAY)
         ScreenshotGray = self.PreprocessImage(ScreenshotGray)
 
         TermplateCoordinates = {}
@@ -38,17 +38,17 @@ class ImageRecognitionAI:
             TemplateGray = self.PreprocessImage(TemplateGray)
 
             Res = cv2.matchTemplate(ScreenshotGray, TemplateGray, cv2.TM_CCOEFF_NORMED)
-            _, max_val, _, max_loc = cv2.minMaxLoc(Res)
+            _, MaxVal, _, MaxLoc = cv2.minMaxLoc(Res)
             
             topping, quantity = TemplateName.split('.')[0].split('-')
-            print(f"Topping: {topping}, Quantity: {quantity}, Accuracy: {max_val*100:.2f}%")
+            print(f"Topping: {topping}, Quantity: {quantity}, Accuracy: {MaxVal*100:.2f}%")
 
-            if max_val >= 0.89:
-                h, w = TemplateGray.shape[:2]
-                bottom_right = (max_loc[0] + w, max_loc[1] + h)
-                TermplateCoordinates[TemplateName] = (max_loc, bottom_right)
+            if MaxVal >= 0.89:
+                Height, Width = TemplateGray.shape[:2]
+                BottomRight = (MaxLoc[0] + Width, MaxLoc[1] + Height)
+                TermplateCoordinates[TemplateName] = (MaxLoc, BottomRight)
 
-                AllMatches.append((topping, int(quantity), max_val, max_loc[0], TemplateName))
+                AllMatches.append((topping, int(quantity), MaxVal, MaxLoc[0], TemplateName))
 
         AllMatches.sort(key=lambda x: (x[0], -x[2]))
 
@@ -68,32 +68,32 @@ class ImageRecognitionAI:
             else:
                 del matches['vegan_patty']
 
-        ordered_matches = {}
+        OrderedMatches = {}
         for k, v in sorted(matches.items(), key=lambda item: item[1]['position']):
-            crop_img = screenshot[v['coordinates'][0][1]:v['coordinates'][1][1], v['coordinates'][0][0]:v['coordinates'][1][0]]
-            crop_img = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
+            CropImg = Screenshot[v['coordinates'][0][1]:v['coordinates'][1][1], v['coordinates'][0][0]:v['coordinates'][1][0]]
+            CropImg = cv2.cvtColor(CropImg, cv2.COLOR_BGR2GRAY)
 
             Template_1_path = os.path.join("QuantityTemplates", "1.png")
             Template_2_path = os.path.join("QuantityTemplates", "2.png")
             Template_1 = cv2.imread(Template_1_path, cv2.IMREAD_COLOR)
-            Template_1_gray = cv2.cvtColor(Template_1, cv2.COLOR_BGR2GRAY)
+            Template_1Gray = cv2.cvtColor(Template_1, cv2.COLOR_BGR2GRAY)
             Template_2 = cv2.imread(Template_2_path, cv2.IMREAD_COLOR)
-            Template_2_gray = cv2.cvtColor(Template_2, cv2.COLOR_BGR2GRAY)
-            res_1 = cv2.matchTemplate(crop_img, Template_1_gray, cv2.TM_CCOEFF_NORMED)
-            res_2 = cv2.matchTemplate(crop_img, Template_2_gray, cv2.TM_CCOEFF_NORMED)
+            Template_2Gray = cv2.cvtColor(Template_2, cv2.COLOR_BGR2GRAY)
+            res_1 = cv2.matchTemplate(CropImg, Template_1Gray, cv2.TM_CCOEFF_NORMED)
+            res_2 = cv2.matchTemplate(CropImg, Template_2Gray, cv2.TM_CCOEFF_NORMED)
             _, max_val_1, _, _ = cv2.minMaxLoc(res_1)
             _, max_val_2, _, _ = cv2.minMaxLoc(res_2)
 
             print(f"{k} Quantity Check - 1 Quantity Accuracy: {max_val_1*100:.2f}%, 2 Quantity Accuracy: {max_val_2*100:.2f}%")
             if max_val_2 > max_val_1:
-                ordered_matches[k] = 2
+                OrderedMatches[k] = 2
             else:
-                ordered_matches[k] = 1
+                OrderedMatches[k] = 1
 
-        return ordered_matches
+        return OrderedMatches
 
-    def MatchFries(self, screenshot):
-        ScreenshotGray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+    def MatchFries(self, Screenshot):
+        ScreenshotGray = cv2.cvtColor(Screenshot, cv2.COLOR_BGR2GRAY)
         ScreenshotGray = self.PreprocessImage(ScreenshotGray)
         TermplateCoordinates = {}
 
@@ -104,58 +104,58 @@ class ImageRecognitionAI:
             TemplateGray = self.PreprocessImage(TemplateGray)
 
             Res = cv2.matchTemplate(ScreenshotGray, TemplateGray, cv2.TM_CCOEFF_NORMED)
-            _, max_val, _, max_loc = cv2.minMaxLoc(Res)
+            _, MaxVal, _, MaxLoc = cv2.minMaxLoc(Res)
 
-            if max_val >= 0.95:
-                h, w = TemplateGray.shape[:2]
-                bottom_right = (max_loc[0] + w, max_loc[1] + h)
-                TermplateCoordinates[TemplateName] = (max_loc, bottom_right)
+            if MaxVal >= 0.95:
+                Height, Width = TemplateGray.shape[:2]
+                BottomRight = (MaxLoc[0] + Width, MaxLoc[1] + Height)
+                TermplateCoordinates[TemplateName] = (MaxLoc, BottomRight)
 
-                fry_type, fry_size = TemplateName.split('.')[0].split('-')
-                print(f"Fry Type: {fry_type}, Size: {fry_size}, Accuracy: {max_val*100:.2f}%")
+                FryType, FrySize = TemplateName.split('.')[0].split('-')
+                print(f"Fry Type: {FryType}, Size: {FrySize}, Accuracy: {MaxVal*100:.2f}%")
 
-                crop_img = screenshot[max_loc[1]:max_loc[1] + h, max_loc[0]:max_loc[0] + w]
-                crop_img = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
-                size_matches = {}
-                for size_name in ['small', 'medium', 'large']:
-                    size_TemplatePath = os.path.join("SizeTemplates", f"{size_name}.png")
-                    size_Template = cv2.imread(size_TemplatePath, cv2.IMREAD_COLOR)
-                    size_Template_gray = cv2.cvtColor(size_Template, cv2.COLOR_BGR2GRAY)
-                    res_size = cv2.matchTemplate(crop_img, size_Template_gray, cv2.TM_CCOEFF_NORMED)
-                    _, max_val_size, _, _ = cv2.minMaxLoc(res_size)
-                    size_matches[size_name] = max_val_size
-                    print(f"{fry_type} Size Check - {size_name} Size Accuracy: {max_val_size*100:.2f}%")
+                CropImg = Screenshot[MaxLoc[1]:MaxLoc[1] + Height, MaxLoc[0]:MaxLoc[0] + Width]
+                CropImg = cv2.cvtColor(CropImg, cv2.COLOR_BGR2GRAY)
+                SizeMatches = {}
+                for SizeName in ['small', 'medium', 'large']:
+                    SizeTemplatePath = os.path.join("SizeTemplates", f"{SizeName}.png")
+                    SizeTemplate = cv2.imread(SizeTemplatePath, cv2.IMREAD_COLOR)
+                    SizeTemplateGray = cv2.cvtColor(SizeTemplate, cv2.COLOR_BGR2GRAY)
+                    ResSize = cv2.matchTemplate(CropImg, SizeTemplateGray, cv2.TM_CCOEFF_NORMED)
+                    _, MaxValSize, _, _ = cv2.minMaxLoc(ResSize)
+                    SizeMatches[SizeName] = MaxValSize
+                    print(f"{FryType} Size Check - {SizeName} Size Accuracy: {MaxValSize*100:.2f}%")
 
-                best_size = max(size_matches, key=size_matches.get)
-                if size_matches[best_size] >= 0.9:
-                    crop_img_upper_half = crop_img[:h//2, :]
-                    fry_type_matches = {}
-                    for fry_TemplateName in os.listdir(self.FriesTemplatesFolder):
-                        fry_TemplatePath = os.path.join(self.FriesTemplatesFolder, fry_TemplateName)
-                        fry_Template = cv2.imread(fry_TemplatePath, cv2.IMREAD_COLOR)
-                        fry_Template_gray = cv2.cvtColor(fry_Template, cv2.COLOR_BGR2GRAY)
-                        fry_Template_gray_upper_half = fry_Template_gray[:fry_Template_gray.shape[0]//2, :]
+                BestSize = max(SizeMatches, key=SizeMatches.get)
+                if SizeMatches[BestSize] >= 0.9:
+                    CropImgUpperHalf = CropImg[:Height//2, :]
+                    FryTypeMatches = {}
+                    for FryTemplateName in os.listdir(self.FriesTemplatesFolder):
+                        FryTemplatePath = os.path.join(self.FriesTemplatesFolder, FryTemplateName)
+                        FryTemplate = cv2.imread(FryTemplatePath, cv2.IMREAD_COLOR)
+                        FryTemplateGray = cv2.cvtColor(FryTemplate, cv2.COLOR_BGR2GRAY)
+                        FryTemplateGrayUpperHalf = FryTemplateGray[:FryTemplateGray.shape[0]//2, :]
                         
-                        if crop_img_upper_half.shape[0] >= fry_Template_gray_upper_half.shape[0] and crop_img_upper_half.shape[1] >= fry_Template_gray_upper_half.shape[1]:
-                            res_type = cv2.matchTemplate(crop_img_upper_half, fry_Template_gray_upper_half, cv2.TM_CCOEFF_NORMED)
-                            _, max_val_type, _, _ = cv2.minMaxLoc(res_type)
-                            fry_type_name = fry_TemplateName.split('-')[0]
-                            if fry_type_name not in fry_type_matches or fry_type_matches[fry_type_name] < max_val_type:
-                                fry_type_matches[fry_type_name] = max_val_type
-                    if fry_type_matches:
-                        best_fry_type = max(fry_type_matches, key=fry_type_matches.get)
-                        print(f"{fry_type} Type Check - Best Match: {best_fry_type}, Accuracy: {fry_type_matches[best_fry_type]*100:.2f}%")
-                        if fry_type_matches[best_fry_type] >= 0.9:
-                            return {best_fry_type: best_size}
+                        if CropImgUpperHalf.shape[0] >= FryTemplateGrayUpperHalf.shape[0] and CropImgUpperHalf.shape[1] >= FryTemplateGrayUpperHalf.shape[1]:
+                            ResType = cv2.matchTemplate(CropImgUpperHalf, FryTemplateGrayUpperHalf, cv2.TM_CCOEFF_NORMED)
+                            _, MaxValType, _, _ = cv2.minMaxLoc(ResType)
+                            FryTypeName = FryTemplateName.split('-')[0]
+                            if FryTypeName not in FryTypeMatches or FryTypeMatches[FryTypeName] < MaxValType:
+                                FryTypeMatches[FryTypeName] = MaxValType
+                    if FryTypeMatches:
+                        BestFryType = max(FryTypeMatches, key=FryTypeMatches.get)
+                        print(f"{FryType} Type Check - Best Match: {BestFryType}, Accuracy: {FryTypeMatches[BestFryType]*100:.2f}%")
+                        if FryTypeMatches[BestFryType] >= 0.9:
+                            return {BestFryType: BestSize}
                     else:
-                        print("No fry type matches found due to size constraints.")
+                        print("No Fry type matches found due to Size constraints.")
                 return {}
         return {}
 
-    def MatchDrink(self, screenshot):
-        ScreenshotGray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+    def MatchDrink(self, Screenshot):
+        ScreenshotGray = cv2.cvtColor(Screenshot, cv2.COLOR_BGR2GRAY)
         ScreenshotGray = self.PreprocessImage(ScreenshotGray)
-        best_match = {"drink_type": None, "drink_size": None, "accuracy": 0}
+        BestMatch = {"DrinkType": None, "DrinkSize": None, "accuracy": 0}
 
         for TemplateName in os.listdir(self.DrinkTemplatesFolder):
             TemplatePath = os.path.join(self.DrinkTemplatesFolder, TemplateName)
@@ -164,101 +164,101 @@ class ImageRecognitionAI:
             TemplateGray = self.PreprocessImage(TemplateGray)
 
             Res = cv2.matchTemplate(ScreenshotGray, TemplateGray, cv2.TM_CCOEFF_NORMED)
-            _, max_val, _, _ = cv2.minMaxLoc(Res)
+            _, MaxVal, _, _ = cv2.minMaxLoc(Res)
 
-            drink_type, drink_size = TemplateName.split('.')[0].split('-')
-            print(f"Drink Type: {drink_type}, Size: {drink_size}, Accuracy: {max_val*100:.2f}%")
+            DrinkType, DrinkSize = TemplateName.split('.')[0].split('-')
+            print(f"Drink Type: {DrinkType}, Size: {DrinkSize}, Accuracy: {MaxVal*100:.2f}%")
 
-            if max_val > best_match["accuracy"]:
-                best_match = {"drink_type": drink_type, "drink_size": drink_size, "accuracy": max_val}
+            if MaxVal > BestMatch["accuracy"]:
+                BestMatch = {"DrinkType": DrinkType, "DrinkSize": DrinkSize, "accuracy": MaxVal}
 
-        if best_match["accuracy"] >= 0.9:
-            return {best_match["drink_type"]: best_match["drink_size"]}
+        if BestMatch["accuracy"] >= 0.9:
+            return {BestMatch["DrinkType"]: BestMatch["DrinkSize"]}
         else:
             return {}
 
     def CaptureAndProcessOrderV1(self):
         print("Capturing and processing burger order...")
-        burger_screenshot = self.TakeScreenshot(self.OrderArea)
-        burger_ordered_matches = self.MatchBurgers(burger_screenshot)
-        print(f"Ordered matches found: {burger_ordered_matches}")
+        BurgerScreenshot = self.TakeScreenshot(self.OrderArea)
+        BurgerOrderedMatches = self.MatchBurgers(BurgerScreenshot)
+        print(f"Ordered matches found: {BurgerOrderedMatches}")
 
         print("Waiting for fries order...")
         time.sleep(3)
 
         print("Capturing and processing fries order...")
-        fries_screenshot = self.TakeScreenshot(self.OrderArea)
-        fries_ordered_matches = self.MatchFries(fries_screenshot)
-        print(f"Fries ordered matches found: {fries_ordered_matches}")
+        FriesScreenshot = self.TakeScreenshot(self.OrderArea)
+        FriesOrderedMatches = self.MatchFries(FriesScreenshot)
+        print(f"Fries ordered matches found: {FriesOrderedMatches}")
 
-        print("Waiting for drink order...")
+        print("Waiting for Drink order...")
         time.sleep(3)
 
-        print("Capturing and processing drink order...")
-        drink_screenshot = self.TakeScreenshot(self.OrderArea)
-        drink_ordered_matches = self.MatchDrink(drink_screenshot)
-        print(f"Drink ordered matches found: {drink_ordered_matches}")
+        print("Capturing and processing Drink order...")
+        DrinkScreenshot = self.TakeScreenshot(self.OrderArea)
+        DrinkOrderedMatches = self.MatchDrink(DrinkScreenshot)
+        print(f"Drink ordered matches found: {DrinkOrderedMatches}")
         
-        if burger_ordered_matches:
-            BurgerOrder(burger_ordered_matches)
+        if BurgerOrderedMatches:
+            BurgerOrder(BurgerOrderedMatches)
         else:
             print("No matching toppings found.")
             
         time.sleep(0.3)
             
-        if fries_ordered_matches:
-            for fry, size in fries_ordered_matches.items():
-                FriesOrder(fry, size.capitalize())
+        if FriesOrderedMatches:
+            for Fry, Size in FriesOrderedMatches.items():
+                FriesOrder(Fry, Size.capitalize())
             
-        if drink_ordered_matches:
-            for drink, size in drink_ordered_matches.items():
-                DrinkOrder(drink, size.capitalize())
+        if DrinkOrderedMatches:
+            for Drink, Size in DrinkOrderedMatches.items():
+                DrinkOrder(Drink, Size.capitalize())
             
         time.sleep(0.3)
         
         CompleteOrder()
 
     def CaptureAndProcessOrderV2(self):
-        start_time = time.time()
+        StartTime = time.time()
         
         print("Capturing and processing burger order...")
-        burger_screenshot = self.TakeScreenshot(self.OrderArea)
-        burger_ordered_matches = self.MatchBurgers(burger_screenshot)
-        print(f"Ordered matches found: {burger_ordered_matches}")
+        BurgerScreenshot = self.TakeScreenshot(self.OrderArea)
+        BurgerOrderedMatches = self.MatchBurgers(BurgerScreenshot)
+        print(f"Ordered matches found: {BurgerOrderedMatches}")
         
-        if burger_ordered_matches:
-            BurgerOrder(burger_ordered_matches)
+        if BurgerOrderedMatches:
+            BurgerOrder(BurgerOrderedMatches)
         else:
             print("No matching toppings found.")
         
-        burger_time = time.time() - start_time
-        time_to_wait = max(3.5 - burger_time, 0)
-        print(f"Waiting {time_to_wait:.2f} seconds for fries order...")
-        time.sleep(time_to_wait)
+        Burgertime = time.time() - StartTime
+        TimeToWait = max(3.5 - Burgertime, 0)
+        print(f"Waiting {TimeToWait:.2f} seconds for fries order...")
+        time.sleep(TimeToWait)
 
-        start_time = time.time()
+        StartTime = time.time()
         print("Capturing and processing fries order...")
-        fries_screenshot = self.TakeScreenshot(self.OrderArea)
-        fries_ordered_matches = self.MatchFries(fries_screenshot)
-        print(f"Fries ordered matches found: {fries_ordered_matches}")
+        FriesScreenshot = self.TakeScreenshot(self.OrderArea)
+        FriesOrderedMatches = self.MatchFries(FriesScreenshot)
+        print(f"Fries ordered matches found: {FriesOrderedMatches}")
         
-        if fries_ordered_matches:
-            for fry, size in fries_ordered_matches.items():
-                FriesOrder(fry, size.capitalize())
+        if FriesOrderedMatches:
+            for Fry, Size in FriesOrderedMatches.items():
+                FriesOrder(Fry, Size.capitalize())
         
-        fries_time = time.time() - start_time
-        time_to_wait = max(3 - fries_time, 0)
-        print(f"Waiting {time_to_wait:.2f} seconds for drink order...")
-        time.sleep(time_to_wait)
+        FriesTime = time.time() - StartTime
+        TimeToWait = max(3 - FriesTime, 0)
+        print(f"Waiting {TimeToWait:.2f} seconds for Drink order...")
+        time.sleep(TimeToWait)
 
-        print("Capturing and processing drink order...")
-        drink_screenshot = self.TakeScreenshot(self.OrderArea)
-        drink_ordered_matches = self.MatchDrink(drink_screenshot)
-        print(f"Drink ordered matches found: {drink_ordered_matches}")
+        print("Capturing and processing Drink order...")
+        DrinkScreenshot = self.TakeScreenshot(self.OrderArea)
+        DrinkOrderedMatches = self.MatchDrink(DrinkScreenshot)
+        print(f"Drink ordered matches found: {DrinkOrderedMatches}")
         
-        if drink_ordered_matches:
-            for drink, size in drink_ordered_matches.items():
-                DrinkOrder(drink, size.capitalize())
+        if DrinkOrderedMatches:
+            for Drink, Size in DrinkOrderedMatches.items():
+                DrinkOrder(Drink, Size.capitalize())
         
         time.sleep(0.3)
         
